@@ -1,0 +1,474 @@
+---
+title: "eda"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(factoextra)
+library(Amelia)
+library(psych)
+library(stargazer)
+
+```
+
+```{r}
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+
+```
+
+```{r}
+setwd("~/Downloads/JP")
+anes_num_pca <- read_csv('anes_num_pca.csv')
+
+anes_num_pca_16 <- read_csv('anes_num_pca_16.csv')
+
+
+```
+
+
+
+
+```{r}
+#lib
+median(anes_num_pca$consq, na.rm = T)
+median(anes_num_pca$branches, na.rm = T)
+mean(anes_num_pca$crit, na.rm = T)
+mean(anes_num_pca$facts, na.rm = T)
+median(anes_num_pca$cong_courts, na.rm = T)
+
+max(anes_num_pca$crit, na.rm = T)
+```
+
+
+
+
+```{r}
+#pol
+mean(anes_num_pca$int_camp, na.rm = T)
+mean(anes_num_pca$int_pol, na.rm = T)
+mean(anes_num_pca$vote_duty, na.rm = T)
+mean(anes_num_pca$int_med, na.rm = T)
+
+getmode(anes_num_pca$consq)
+
+
+
+max(anes_num_pca$vote_duty, na.rm = T)
+
+
+max(anes_num_pca$vote_duty, na.rm = T)
+
+```
+
+
+
+
+```{r}
+#redist
+mean(anes_num_pca$red_ineq, na.rm = T)
+mean(anes_num_pca$job_gov, na.rm = T)
+mean(anes_num_pca$tax_mill, na.rm = T)
+mean(anes_num_pca$min_wage, na.rm = T)
+
+
+
+
+unique(anes_num_pca$red_ineq, na.rm= T)
+max(anes_num_pca$job_gov, na.rm = T)
+unique(anes_num_pca$tax_mill, na.rm = T)
+median(anes_num_pca$min_wage, na.rm = T)
+
+
+anes_num_pca$raise <-  if_else(anes_num_pca$min_wage >= 4,1, 0)
+mean(anes_num_pca$raise , na.rm = T)
+anes_num_pca$tax_agree <-  if_else(anes_num_pca$tax_mill == 3,1, 0)
+
+mean(anes_num_pca$tax_agree , na.rm = T)
+anes_num_pca$ineq_agree <-  if_else(anes_num_pca$red_ineq == 3,1, 0)
+
+mean(anes_num_pca$ineq_agree , na.rm = T)
+```
+
+
+
+```{r}
+#spend
+
+
+
+
+
+mean(anes_num_pca$highway, na.rm = T)
+mean(anes_num_pca$welfare, na.rm = T)
+mean(anes_num_pca$poor, na.rm = T)
+mean(anes_num_pca$ss, na.rm= T)
+mean(anes_num_pca$school, na.rm= T)
+
+
+median(anes_num_pca$highway, na.rm = T)
+median(anes_num_pca$welfare, na.rm = T)
+median(anes_num_pca$poor, na.rm = T)
+median(anes_num_pca$ss, na.rm= T)
+median(anes_num_pca$school, na.rm= T)
+
+
+anes_num_pca$welfare_agree <-  if_else(anes_num_pca$welfare == 3,1, 0)
+
+anes_num_pca$poor_agree <-  if_else(anes_num_pca$poor == 3,1, 0)
+
+anes_num_pca$ss_agree <-  if_else(anes_num_pca$ss == 3,1, 0)
+
+anes_num_pca$school_agree <-  if_else(anes_num_pca$school == 3,1, 0)
+
+anes_num_pca$highway_agree <-  if_else(anes_num_pca$highway == 3,1, 0)
+
+
+anes_num_pca$ineq_agree <-  if_else(anes_num_pca$red_ineq == 3,1, 0)
+
+mean(anes_num_pca$highway_agree , na.rm = T)
+
+mean(anes_num_pca$school_agree , na.rm = T)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+median(anes_num_pca$age, na.rm = T)
+
+```
+
+
+
+
+
+
+#2016
+
+```{r}
+#lib
+median(anes_num_pca_16$trad, na.rm = T) #rotten apples
+median(anes_num_pca_16$true, na.rm = T)
+median(anes_num_pca_16$bend, na.rm = T)
+
+
+
+anes_num_pca_16$bend_agree <-  if_else(anes_num_pca_16$bend >= 4,1, 0)
+
+mean(anes_num_pca_16$bend_agree , na.rm = T)
+
+
+anes_num_pca_16$true_agree <-  if_else(anes_num_pca_16$true >= 4,1, 0)
+
+mean(anes_num_pca_16$true_agree , na.rm = T)
+
+
+
+anes_num_pca_16$trad_agree <-  if_else(anes_num_pca_16$trad >= 4,1, 0)
+
+mean(anes_num_pca_16$trad_agree , na.rm = T)
+
+
+max(anes_num_pca_16$trad, na.rm = T)
+max(anes_num_pca_16$true, na.rm = T)
+max(anes_num_pca_16$bend, na.rm = T)
+```
+
+
+
+
+```{r}
+#pol
+mean(anes_num_pca_16$int_camp, na.rm = T)
+mean(anes_num_pca_16$int_pol, na.rm = T)
+mean(anes_num_pca_16$vote_duty, na.rm = T)
+mean(anes_num_pca_16$int_med, na.rm = T)
+
+
+anes_num_pca$int_pol_agree <-  if_else(anes_num_pca$int_pol >= 3,1, 0)
+
+mean(anes_num_pca$int_pol_agree , na.rm = T)
+
+
+anes_num_pca$int_camp_agree <-  if_else(anes_num_pca$int_camp >= 2,1, 0)
+
+mean(anes_num_pca$int_camp_agree , na.rm = T)
+
+
+
+
+
+anes_num_pca$vd_agree <-  if_else(anes_num_pca$vote_duty == 3,1, 0)
+
+mean(anes_num_pca$vd_agree , na.rm = T)
+
+
+
+max(anes_num_pca_16$vote_duty, na.rm = T)
+
+
+max(anes_num_pca_16$vote_duty, na.rm = T)
+
+```
+
+
+
+
+```{r}
+#redist
+mean(anes_num_pca_16$red_ineq, na.rm = T)
+mean(anes_num_pca_16$job_gov, na.rm = T)
+mean(anes_num_pca_16$tax_mill, na.rm = T)
+mean(anes_num_pca_16$min_wage, na.rm = T)
+
+
+
+
+max(anes_num_pca_16$red_ineq, na.rm= T)
+max(anes_num_pca_16$job_gov, na.rm = T)
+max(anes_num_pca_16$tax_mill, na.rm = T)
+max(anes_num_pca_16$min_wage, na.rm = T)
+
+```
+
+
+
+```{r}
+#spend
+
+mean(anes_num_pca_16$welfare, na.rm = T)
+mean(anes_num_pca_16$poor, na.rm = T)
+mean(anes_num_pca_16$ss, na.rm= T)
+mean(anes_num_pca_16$school, na.rm= T)
+
+
+
+median(anes_num_pca_16$welfare, na.rm = T)
+median(anes_num_pca_16$poor, na.rm = T)
+median(anes_num_pca_16$ss, na.rm= T)
+median(anes_num_pca_16$school, na.rm= T)
+
+```
+
+```{r}
+#control
+unique(anes_num_pca$sex, na.rm = T)
+mean(anes_num_pca_16$sex, na.rm = T)
+
+
+unique(anes_num_pca$educ, na.rm = T)
+unique(anes_num_pca$educ, na.rm = T)
+mean(anes_num_pca_16$educ, na.rm = T)
+getmode(anes_num_pca_16$educ)
+median(anes_num_pca_16$income, na.rm = T)
+median(anes_num_pca$income, na.rm = T)
+
+```
+
+
+
+```{r}
+#rr
+
+
+median(anes_num_pca$blm, na.rm = T)
+median(anes_num_pca_16$blm, na.rm = T)
+
+
+mean(anes_num_pca$black_deserve, na.rm = T)
+mean(anes_num_pca_16$black_deserve, na.rm = T)
+
+
+mean(anes_num_pca$black_try, na.rm = T)
+mean(anes_num_pca_16$black_try, na.rm = T)
+
+
+
+mean(anes_num_pca$slave, na.rm = T)
+mean(anes_num_pca_16$slave, na.rm = T)
+```
+
+
+```{r}
+
+impt_labels_5 <- c("Not important at all", "A little important", "Moderately important", "Very important", "Extremely important")
+
+ggplot(anes_num_pca, aes(x=consq), title = )  +  
+        geom_bar(aes(y = (..count..)/sum(..count..)), fill = 'purple') + 
+          scale_y_continuous(labels=scales::percent) +
+  theme(legend.position="top") + ggtitle("Consequences for politicians' misconduct important to democracy (2020)") + xlab("Importance") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())  + ylab("Share of Reponses") +geom_text(aes( label = scales::percent(..prop..),
+                   y= ..prop.. ), stat= "count", vjust = -.5)  + scale_x_discrete(limits= impt_labels_5)
+```
+
+
+```{r}
+ggplot(anes_num_pca, aes(x=job_gov), title = ) +
+  geom_histogram(fill="green", alpha=0.5, position = "identity", bins = 30) +
+  theme(legend.position="top") + ggtitle("Agreement that government should provide jobs and standard of living (2020)") + xlab("Agreement (1-7)") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + scale_x_discrete( limits = c(1:7))
+```
+
+
+
+```{r}
+#create one dataset
+#in aesthetic, set group = to the year, or try color
+
+graph_20 <- anes_num_pca
+graph_20$year <- as.factor(2020)
+
+
+graph_16 <- anes_num_pca_16
+graph_16$year <- as.factor(2016)
+
+
+
+graph_16 <- graph_16[, intersect(colnames(graph_16), colnames(graph_20))]
+
+graph_20 <- graph_20[, intersect(colnames(graph_20), colnames(graph_16))]
+
+
+graph <- rbind(graph_16, graph_20)
+head(graph)
+
+sum(is.na(graph$int_pol))
+```
+
+```{r}
+graph_int_pol <- subset(graph, !is.na(int_pol))
+
+interest_labs <- c("Not at all interested", "Not very interested", "Somewhat interested", "Very interested")
+
+
+graph_int_pol %>%
+  mutate(year = factor(year)) %>%
+  group_by(year, int_pol) %>%
+  count() %>%
+  group_by(year) %>%
+  mutate(percentage = round(n/sum(n), digits = 4)) %>%
+  ggplot(aes(x = int_pol, y = percentage, fill = year)) +
+    geom_bar(position = 'dodge', stat = 'identity') + 
+          scale_y_continuous(labels=scales::percent) +
+  theme(legend.position="top") + ggtitle("How interested are you in politics?") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + scale_x_discrete(limits = interest_labs) + 
+    labs(x = 'Interest', y = 'Percentage', fill = 'Year') +  geom_text(aes(label = percentage * 100), vjust = "inward",  position = position_dodge(1))
+```
+
+
+
+
+
+
+```{r}
+
+agree_lab <- c("Disagree strongly", "Disagree somewhat", "Neither", "Agree somewhat", "Agree strongly")
+anes_num_pca_16$trad <- as.numeric(anes_num_pca_16$trad)
+
+ggplot(anes_num_pca_16, aes(x=trad))  +  
+        geom_bar(aes(y = (..count..)/sum(..count..)), fill = 'red') + 
+          scale_y_continuous(labels=scales::percent) +
+  theme(legend.position="top") + ggtitle("Country needs leader to crush evil and take us back to our true path (2016)") + xlab("Agreement") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())  + ylab("Share of Reponses") +geom_text(aes( label = scales::percent(..prop..),
+                   y= ..prop.. ), stat= "count", vjust = -.5) + scale_x_discrete(limits = agree_lab)
+
+
+```
+
+
+
+
+
+
+```{r}
+
+graph_job <- subset(graph, !is.na(job_gov))
+
+graph_job %>%
+  mutate(year = factor(year)) %>%
+  group_by(year, job_gov) %>%
+  count() %>%
+  group_by(year) %>%
+  mutate(percentage = round(n/sum(n), digits = 4)) %>%
+  ggplot(aes(x = job_gov, y = percentage, fill = year)) +
+    geom_bar(position = 'dodge', stat = 'identity') + 
+          scale_y_continuous(labels=scales::percent) +
+  theme(legend.position="top") + ggtitle("Agreement that government should provide jobs and standard of living") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + scale_x_discrete(limits = c(1:7)) + 
+    labs(x = 'Agreement (1-7)', y = 'Percentage', fill = 'Year') +  geom_text(aes(label = percentage * 100), vjust = "inward",  position = position_dodge(.9))
+
+
+
+
+```
+
+
+
+
+
+```{r}
+
+ggplot(anes_num_pca_16, aes(x=int_pol), title = )  +  
+        geom_bar(aes(y = (..count..)/sum(..count..)), fill = 'blue') + 
+          scale_y_continuous(labels=scales::percent) +
+  theme(legend.position="top") + ggtitle("How interested are you in politics (2016)") + xlab("Interest (1-4)") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + scale_x_discrete(limits = c(1:6)) + ylab("Share of Reponses") +  scale_x_discrete( limits = c(1:4))+
+  geom_text(aes( label = scales::percent(round(..prop.., 3)),y= ..prop.. ), stat= "count", vjust = -.1) 
+
+```
+
+
+
+```{r}
+graph_welfare <- subset(graph, !is.na(welfare))
+
+graph_welfare %>%
+  mutate(year = factor(year)) %>%
+  group_by(year, welfare) %>%
+  count() %>%
+  group_by(year) %>%
+  mutate(percentage = round(n/sum(n), digits = 4)) %>%
+  ggplot(aes(x = welfare, y = percentage, fill = year)) +
+    geom_bar(position = 'dodge', stat = 'identity') + 
+          scale_y_continuous(labels=scales::percent) +
+  theme(legend.position="top") + ggtitle("Spending on welfare") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + scale_x_discrete(limits = c(1:3), labels = c("Decrease", "Remain the same", "Increase")) + 
+    labs(x = 'Spending', y = 'Percentage', fill = 'Year') +  geom_text(aes(label = percentage * 100), vjust = "inward",  position = position_dodge(.9))
+```
+
+
+```{r}
+ggplot(anes_num_pca_16, aes(x=welfare), title = ) +
+  geom_histogram(fill="purple", alpha=0.5, position = "identity", bins = 30) +
+  theme(legend.position="top") + ggtitle("Spending on welfare change (2016)") + xlab("Spending") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + scale_x_discrete(limits = c(1:3), labels = c("Decrease", "Remain the same", "Increase"))
+```
+
+
+```{r}
+#split by party
+anes_num_pca_reps <- subset(anes_num_pca, party_id == 2 )
+anes_num_pca_dems <- subset(anes_num_pca, party_id == 1 )
+
+mean(anes_num_pca_reps$consq, na.rm = T)
+mean(anes_num_pca_dems$consq, na.rm = T)
+
+
+mean(anes_num_pca_reps$vote_duty, na.rm = T)
+mean(anes_num_pca_dems$vote_duty, na.rm = T)
+
+mean(anes_num_pca_reps$red_ineq, na.rm = T)
+mean(anes_num_pca_dems$red_ineq, na.rm = T)
+
+
+
+```
+

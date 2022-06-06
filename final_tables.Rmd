@@ -1,0 +1,722 @@
+---
+title: "final_tables"
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r}
+
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(factoextra)
+library(Amelia)
+library(psych)
+library(stargazer)
+library(coefplot)
+```
+
+```{r}
+anes_num_pca <- read_csv('anes_num_pca_new.csv')
+anes_num_pca_16 <- read_csv('anes_num_pca_16_new.csv')
+```
+
+**Gen. population models 2020**
+```{r}
+#lib:redist model
+
+lib_redist_gen <- lm(redist_pca1_scaled ~ lib_pca1_scaled  + black + white + hisp + asian + sex  + seven_point + income + educ + age  +pol_pca1_scaled*seven_point , weights = weights, data = anes_num_pca)
+summary(lib_redist_gen)
+
+
+
+#lib spend model
+lib_spend_gen <- lm(spend_pca1_scaled ~ lib_pca1_scaled  +  black + white + hisp + asian + sex   + seven_point  +income + educ + age +pol_pca1_scaled*seven_point , weights = weights, data = anes_num_pca)
+summary(lib_spend_gen)
+
+
+
+
+#with interaction
+lib_redist_gen_int <- lm(redist_pca1_scaled ~ lib_pca1_scaled  + black + white + hisp + asian + sex   + seven_point + income + educ + age +  +lib_pca1_scaled*seven_point+pol_pca1_scaled*seven_point + lib_pca1_scaled*pol_pca1_scaled , weights = weights, data = anes_num_pca)
+summary(lib_redist_gen_int)
+
+
+
+#with interaction
+lib_spend_gen_int <- lm(spend_pca1_scaled ~ lib_pca1_scaled  +  black + white + hisp+ asian  + sex + seven_point  +income + educ + age +pol_pca1_scaled*seven_point + +lib_pca1_scaled*seven_point + lib_pca1_scaled*pol_pca1_scaled , weights = weights, data = anes_num_pca)
+summary(lib_spend_gen_int)
+
+
+
+
+
+
+```
+
+```{r, results = 'asis'}
+
+stargazer(lib_redist_gen, lib_spend_gen, lib_redist_gen_int, lib_spend_gen_int, type = "latex", header = FALSE, font.size = "tiny", column.sep.width = "0.5pt", p.auto = F, title = "2020 Models on General Population: Liberal Democracy PC1", covariate.labels = c("Lib. Dem PC1","Black", "White", "Hispanic", "Asian", "Sex", "7 Pt party ID", "Income bracket", "Education",  "Age", "Political Interest" , "Liberalism * Partisanship", "Pol. Interest * Partisanship", " Liberalism * Pol. Interest" ), dep.var.labels = c("Redistribution PC1", "Spending PC1", "Redistribution PC1 (with interactions)", "Spending PC1 (with interactions)"), out = "lib_gen.html")
+summary(lib_redist_gen)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+**Pol interest on its own: 2020 and 2016**
+```{r}
+
+
+pol_redist_gen <- lm(redist_pca1_scaled ~ pol_pca1_scaled +  black + white + hisp + asian + sex + seven_point  +income+ educ  + age, weights = weights, data = anes_num_pca)
+summary(pol_redist_gen)
+
+
+
+#pol spend model
+
+pol_spend_gen <- lm(spend_pca1_scaled ~ pol_pca1_scaled  +  black + white  + hisp +  asian+ sex + seven_point  +income + educ + age, weights = weights, data = anes_num_pca)
+summary(pol_spend_gen)
+
+
+
+#pol models
+pol_redist_gen_16 <- lm(redist_pca1_scaled ~ pol_pca1_scaled +  black + white + hisp  + asian+ sex + seven_point + income + educ  + age, weights = weights, data = anes_num_pca_16)
+
+summary(anes_num_pca_16)
+dim(anes_num_pca_16)
+mean(anes_num_pca_16$asian, na.rm = T)
+
+test <- na.omit(anes_num_pca_16)
+
+mean(test$asian, na.rm = T)
+
+pol_spend_gen_16 <- lm(spend_pca1_scaled ~ pol_pca1_scaled+ black + white  + hisp + asian + sex  + seven_point  +income + educ  + age,  weights = weights,data = anes_num_pca_16)
+summary(pol_spend_gen_16)
+```
+
+
+
+
+
+```{r, results = 'asis'}
+
+stargazer(pol_redist_gen, pol_spend_gen, pol_redist_gen_16, pol_spend_gen_16, type = "latex", header = FALSE, font.size = "tiny", column.sep.width = "0.5pt", p.auto = F, title = "Models on General Population: Political Interest PC1", covariate.labels = c("Pol. Interest PC1","Black", "White", "Hispanic", "Asian", "Sex",  "7 Pt party ID", "Income bracket", "Education",  "Age" ), dep.var.labels = c("Redistribution PC1 (2020)", "Spending PC1 (2020)", "Redistribution PC1 (2016)", "Spending PC1 (2016)"), out = "pol_gen_bothyrs.html")
+```
+
+
+
+
+
+
+
+
+
+
+**Subsetted by party: Lib 2020**
+
+```{r}
+#just republicans
+anes_num_pca_reps <- subset(anes_num_pca, party_id == 2 )
+
+
+#lib:redist model
+lib_redist_rep <- lm(redist_pca1_scaled ~ lib_pca1_scaled +  black + white  + hisp + asian + sex   + income + educ  + age, weights = weights, data = anes_num_pca_reps)
+summary(lib_redist_rep)
+
+
+
+#lib spend model
+lib_spend_rep <- lm(spend_pca1_scaled ~ lib_pca1_scaled  +  black + white + hisp + asian  + sex     +income + educ  + age, weights = weights, data = anes_num_pca_reps)
+summary(lib_spend_rep)
+```
+
+```{r}
+#just dems
+anes_num_pca_dems <- subset(anes_num_pca, party_id == 1 )
+#lib:redist model
+lib_redist_dem <- lm(redist_pca1_scaled ~ lib_pca1_scaled +  black + white  + hisp + asian + sex + income + educ  + age, weights = weights, data = anes_num_pca_dems)
+
+summary(lib_redist_dem)
+
+
+#lib spend model
+lib_spend_dem <- lm(spend_pca1_scaled ~ lib_pca1_scaled  +  black + white +  asian  + hisp + sex     +income + educ + age , weights = weights, data = anes_num_pca_dems)
+summary(lib_spend_dem)
+```
+
+
+
+```{r, results = 'asis'}
+
+stargazer(lib_redist_dem, lib_spend_dem, lib_redist_rep,lib_spend_rep ,type = "latex", header = FALSE, font.size = "tiny", column.sep.width = "0.5pt", p.auto = F, title = "2020 Model, Subsetted by Party: Liberal Democracy PC1", covariate.labels = c("Lib. Dem PC1","Black", "White", "Hispanic", "Asian", "Sex", "Income bracket", "Education", "Age"), dep.var.labels = c("Redistribution PC1 (Dems)", "Spending PC1 (Dems)", "Redistribution PC1 (Reps)", "Spending PC1 (Reps)"), out = "lib_party.html")
+
+```
+
+
+
+
+**Subsetted by party: Pol 2020**
+
+```{r}
+#just republicans
+anes_num_pca_reps <- subset(anes_num_pca, party_id == 2 )
+
+
+#lib:redist model
+pol_redist_rep <- lm(redist_pca1_scaled ~ pol_pca1_scaled +  black + white  + hisp + asian + sex    + income + educ  + age, weights = weights, data = anes_num_pca_reps)
+summary(pol_redist_rep)
+
+
+
+#lib spend model
+pol_spend_rep <- lm(spend_pca1_scaled ~ pol_pca1_scaled  +  black + white + hisp + asian  + sex     +income + educ  + age, weights = weights, data = anes_num_pca_reps)
+summary(pol_spend_rep)
+```
+
+```{r}
+#just dems
+anes_num_pca_dems <- subset(anes_num_pca, party_id == 1 )
+#lib:redist model
+pol_redist_dem <- lm(redist_pca1_scaled ~ pol_pca1_scaled +  black + white  + hisp + asian + sex    + income + educ  + age, weights = weights, data = anes_num_pca_dems)
+
+summary(pol_redist_dem)
+
+
+#lib spend model
+pol_spend_dem <- lm(spend_pca1_scaled ~ pol_pca1_scaled  +  black + white +  asian  + hisp + sex     +income + educ + age , weights = weights, data = anes_num_pca_dems)
+summary(pol_spend_dem)
+```
+
+
+
+```{r, results = 'asis'}
+
+stargazer(pol_redist_dem, pol_spend_dem, pol_redist_rep,pol_spend_rep ,type = "latex", header = FALSE, font.size = "tiny", column.sep.width = "0.5pt", p.auto = F, title = "2020 Model, Subsetted by Party: Political Interest PC1", covariate.labels = c("Pol. Interest PC1","Black", "White", "Hispanic", "Asian", "Sex", "Income bracket", "Education", "Age"), dep.var.labels = c("Redistribution PC1 (Dems)", "Spending PC1 (Dems)", "Redistribution PC1 (Reps)", "Spending PC1 (Reps)"), out = "pol_party.html")
+
+```
+
+
+
+**Gen models 2016**
+
+```{r}
+#lib models
+
+lib_redist_gen_16_int<- lm(redist_pca1_scaled ~ lib_pca1_scaled +  black + white + hisp + asian + sex + seven_point + income + educ  + age +lib_pca1_scaled*seven_point + pol_pca1_scaled*seven_point + lib_pca1_scaled*pol_pca1_scaled , weights = weights, data = anes_num_pca_16)
+summary(lib_redist_gen_16_int)
+
+
+
+lib_spend_gen_16_int <- lm(spend_pca1_scaled ~ lib_pca1_scaled  +  black + white  + hisp + asian + sex + seven_point  +income + educ  + age +lib_pca1_scaled*seven_point + pol_pca1_scaled*seven_point + lib_pca1_scaled*pol_pca1_scaled,  weights = weights,data = anes_num_pca_16)
+summary(lib_spend_gen_16_int)
+
+
+
+lib_redist_gen_16 <- lm(redist_pca1_scaled ~ lib_pca1_scaled +  black + white  + hisp+ asian  + sex  + seven_point + income + educ  + age +pol_pca1_scaled*seven_point, weights = weights, data = anes_num_pca_16)
+summary(lib_redist_gen_16)
+
+
+
+lib_spend_gen_16 <- lm(spend_pca1_scaled ~ lib_pca1_scaled  +  black + white  + hisp + asian + sex + seven_point  +income + educ  + age +pol_pca1_scaled*seven_point,  weights = weights,data = anes_num_pca_16)
+summary(lib_spend_gen_16)
+
+
+
+
+```
+
+
+
+
+
+
+```{r, results = 'asis'}
+
+stargazer(lib_redist_gen_16, lib_spend_gen_16,lib_redist_gen_16_int, lib_spend_gen_16_int, type = "latex", header = FALSE, font.size = "tiny", column.sep.width = "0.5pt", p.auto = F, title = "2016 Models on General Population: Liberal Democracy PC1", covariate.labels = c("Lib. Dem PC1","Black", "White",  "Hispanic", "Asian", "Sex",  "7 Pt party ID", "Income bracket", "Education", "Age", "Political Interest" , "Liberalism * Partisanship", "Pol. Interest * Partisanship" , "Liberalism * Pol. Interest"  ), dep.var.labels = c("Redistribution PC1", "Spending PC1", "Redistribution PC1 (with interaction)", "Spending PC1 (with interaction)"), out = "lib_gen_16.html")
+
+```
+
+
+
+
+
+
+
+
+**subsetted by welfare: 2020**
+```{r}
+#just welfare recipient
+anes_num_pca_wr <- subset(anes_num_pca, fs == 1)
+
+
+#lib:redist model
+lib_redist_wr <- lm(redist_pca1_scaled ~ lib_pca1_scaled +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age+  pol_pca1_scaled * seven_point, weights = weights, data = anes_num_pca_wr)
+summary(lib_redist_wr)
+
+#lib spend model
+lib_spend_wr <- lm(spend_pca1_scaled ~ lib_pca1_scaled  +  black + white + hisp + asian   + sex   + seven_point  +income + educ + age +  pol_pca1_scaled * seven_point, weights = weights, data = anes_num_pca_wr)
+summary(lib_spend_wr)
+
+```
+
+
+
+```{r}
+#just non-welfare recipient
+anes_num_pca_nwr <- subset(anes_num_pca, fs == 0)
+
+#lib:redist model
+lib_redist_nwr <- lm(redist_pca1_scaled ~ lib_pca1_scaled +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age+  pol_pca1_scaled * seven_point, weights = weights, data = anes_num_pca_nwr)
+summary(lib_redist_nwr)
+
+#lib spend model
+lib_spend_nwr <- lm(spend_pca1_scaled ~ lib_pca1_scaled  +  black + white +  asian  + hisp + sex   + seven_point  +income + educ + age +  pol_pca1_scaled * seven_point, weights = weights, data = anes_num_pca_nwr)
+summary(lib_spend_nwr)
+
+
+```
+
+
+
+
+
+
+```{r, results = 'asis'}
+
+stargazer(lib_redist_wr, lib_spend_wr, lib_redist_nwr, lib_spend_nwr, type = "latex", header = FALSE, font.size = "tiny", column.sep.width = "0.5pt", p.auto = F, title = "2020 Model, Subsetted by Welfare Recipients: Liberal Democracy PC1", covariate.labels = c("Lib. Dem PC1","Black", "White", "Hispanic", "Asian", "Sex", "7 Pt party ID", "Income bracket", "Education",  "Age" , "Political Interest PC1", "Pol Int. * Partisanship" ), dep.var.labels = c("Redistribution PC1 (recipients)", "Spending PC1 (recipients)", "Redistribution PC1 (non-recipients)", "Spending PC1 (non-recipients)"), out = "lib_by_welfare.html")
+
+```
+
+
+
+
+
+
+```{r}
+#just welfare recipient
+anes_num_pca_wr <- subset(anes_num_pca, fs == 1)
+
+
+#pol:redist model
+pol_redist_wr <- lm(redist_pca1_scaled ~ pol_pca1_scaled +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age, weights = weights, data = anes_num_pca_wr)
+summary(pol_redist_wr)
+#
+#pol spend model
+pol_spend_wr <- lm(spend_pca1_scaled ~ pol_pca1_scaled  +  black + white + hisp + asian   + sex   + seven_point  +income + educ + age , weights = weights, data = anes_num_pca_wr)
+#summary(pol_spend_wr)
+
+```
+
+
+
+```{r}
+#just non-welfare recipient
+anes_num_pca_nwr <- subset(anes_num_pca, fs == 0)
+
+
+#pol:redist model
+pol_redist_nwr <- lm(redist_pca1_scaled ~ pol_pca1_scaled +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age, weights = weights, data = anes_num_pca_nwr)
+summary(pol_redist_nwr)
+
+#pol spend model
+pol_spend_nwr <- lm(spend_pca1_scaled ~ pol_pca1_scaled  +  black + white +  asian  + hisp + sex   + seven_point  +income + educ + age , weights = weights, data = anes_num_pca_nwr)
+summary(pol_spend_nwr)
+
+```
+
+
+
+```{r, results = 'asis'}
+
+stargazer(pol_redist_wr, pol_spend_wr, pol_redist_nwr, pol_spend_nwr, type = "latex", header = FALSE, font.size = "tiny", column.sep.width = "0.5pt", p.auto = F, title = "2020 Model, Subsetted by Welfare Recipients: Political Interest PC1", covariate.labels = c("Political Interest PC1","Black", "White", "Hispanic", "Asian", "Sex", "7 Pt party ID", "Income bracket", "Education",  "Age" , "Political Interest PC1", "Pol Int. * Partisanship" ), dep.var.labels = c("Redistribution PC1 (recipients)", "Spending PC1 (recipients)", "Redistribution PC1 (non-recipients)", "Spending PC1 (non-recipients)"), out = "pol_by_welfare.html")
+
+```
+
+
+
+
+
+
+
+
+**Subsetted by party: Lib 2020**
+
+```{r}
+#just republicans
+anes_num_pca_reps <- subset(anes_num_pca, party_id == 2 )
+
+
+#lib:redist model
+lib_redist_rep <- lm(redist_pca1_scaled ~ lib_pca1_scaled +  black + white  + hisp + asian + sex  + income + educ  + age, weights = weights, data = anes_num_pca_reps)
+summary(lib_redist_rep)
+
+
+
+#lib spend model
+lib_spend_rep <- lm(spend_pca1_scaled ~ lib_pca1_scaled  +  black + white + hisp + asian  + sex   +  +income + educ  + age, weights = weights, data = anes_num_pca_reps)
+summary(lib_spend_rep)
+```
+
+```{r}
+#just dems
+anes_num_pca_dems <- subset(anes_num_pca, party_id == 1 )
+#lib:redist model
+lib_redist_dem <- lm(redist_pca1_scaled ~ lib_pca1_scaled +  black + white  + hisp + asian + sex    + income + educ  + age, weights = weights, data = anes_num_pca_dems)
+
+summary(lib_redist_dem)
+
+
+#lib spend model
+lib_spend_dem <- lm(spend_pca1_scaled ~ lib_pca1_scaled  +  black + white +  asian  + hisp + sex     +income + educ + age , weights = weights, data = anes_num_pca_dems)
+summary(lib_spend_dem)
+```
+
+
+
+```{r, results = 'asis'}
+
+stargazer(lib_redist_dem, lib_spend_dem, lib_redist_rep,lib_spend_rep ,type = "latex", header = FALSE, font.size = "tiny", column.sep.width = "0.5pt", p.auto = F, title = "2020 Model, Subsetted by Party: Liberal Democracy PC1", covariate.labels = c("Lib. Dem PC1","Black", "White", "Hispanic", "Asian", "Sex",  "7 Pt party ID", "Income bracket", "Education", "Age"), dep.var.labels = c("Redistribution PC1 (Dems)", "Spending PC1 (Dems)", "Redistribution PC1 (Reps)", "Spending PC1 (Reps)"), out = "lib_party.html")
+
+```
+
+
+
+
+**Subsetted by party: Pol 2020**
+
+```{r}
+#just republicans
+anes_num_pca_reps <- subset(anes_num_pca, party_id == 2 )
+
+
+#lib:redist model
+pol_redist_rep <- lm(redist_pca1_scaled ~ pol_pca1_scaled +  black + white  + hisp + asian + sex    + income + educ  + age, weights = weights, data = anes_num_pca_reps)
+summary(pol_redist_rep)
+
+
+
+#lib spend model
+pol_spend_rep <- lm(spend_pca1_scaled ~ pol_pca1_scaled  +  black + white + hisp + asian  + sex     +income + educ  + age, weights = weights, data = anes_num_pca_reps)
+summary(pol_spend_rep)
+```
+
+```{r}
+#just dems
+anes_num_pca_dems <- subset(anes_num_pca, party_id == 1 )
+#lib:redist model
+pol_redist_dem <- lm(redist_pca1_scaled ~ pol_pca1_scaled +  black + white  + hisp + asian + sex    + income + educ  + age, weights = weights, data = anes_num_pca_dems)
+
+summary(pol_redist_dem)
+
+
+#lib spend model
+pol_spend_dem <- lm(spend_pca1_scaled ~ pol_pca1_scaled  +  black + white +  asian  + hisp + sex     +income + educ + age , weights = weights, data = anes_num_pca_dems)
+summary(pol_spend_dem)
+```
+
+
+
+```{r, results = 'asis'}
+
+stargazer(pol_redist_dem, pol_spend_dem, pol_redist_rep,pol_spend_rep ,type = "latex", header = FALSE, font.size = "tiny", column.sep.width = "0.5pt", p.auto = F, title = "2020 Model, Subsetted by Party: Political Interest PC1", covariate.labels = c("Pol. Interest PC1","Black", "White", "Hispanic", "Asian", "Sex", "Income bracket", "Education", "Age"), dep.var.labels = c("Redistribution PC1 (Dems)", "Spending PC1 (Dems)", "Redistribution PC1 (Reps)", "Spending PC1 (Reps)"), out = "pol_party.html")
+
+```
+
+
+
+
+
+
+**Subsetted by party: Lib 2016**
+
+```{r}
+#just republicans
+anes_num_pca_reps_16 <- subset(anes_num_pca_16, party_id == 2 )
+
+
+#lib:redist model
+lib_redist_rep_16 <- lm(redist_pca1_scaled ~ lib_pca1_scaled +  black + white  + hisp  + asian + sex    + income + educ  + age, weights = weights, data = anes_num_pca_reps_16)
+summary(lib_redist_rep_16)
+
+
+
+#lib spend model
+lib_spend_rep_16 <- lm(spend_pca1_scaled ~ lib_pca1_scaled  +  black + white + hisp + asian  + sex     +income + educ  + age, weights = weights, data = anes_num_pca_reps_16)
+summary(lib_spend_rep_16)
+```
+
+```{r}
+#just dems
+anes_num_pca_dems_16 <- subset(anes_num_pca_16, party_id == 1 )
+#lib:redist model
+lib_redist_dem_16 <- lm(redist_pca1_scaled ~ lib_pca1_scaled +  black + white  + hisp + asian + sex    + income + educ  + age, weights = weights, data = anes_num_pca_dems_16)
+
+summary(lib_redist_dem_16)
+
+
+#lib spend model
+lib_spend_dem_16 <- lm(spend_pca1_scaled ~ lib_pca1_scaled  +  black + white   + hisp + asian+ sex     +income + educ + age , weights = weights, data = anes_num_pca_dems_16)
+summary(lib_spend_dem_16)
+```
+
+
+
+```{r, results = 'asis'}
+
+stargazer(lib_redist_dem_16, lib_spend_dem_16, lib_redist_rep_16,lib_spend_rep_16 ,type = "latex", header = FALSE, font.size = "tiny", column.sep.width = "0.5pt", p.auto = F, title = "2016 Model, Subsetted by Party: Liberal Democracy PC1", covariate.labels = c("Lib. Dem PC1","Black", "White", "Hispanic", "Asian", "Sex",  "7 Pt party ID", "Income bracket", "Education", "Age"), dep.var.labels = c("Redistribution PC1 (Dems)", "Spending PC1 (Dems)", "Redistribution PC1 (Reps)", "Spending PC1 (Reps)"), out = "lib_party_16.html")
+
+
+summary(lib_spend_dem_16)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+**Subsetted by party: Pol 2016**
+
+```{r}
+#just republicans
+anes_num_pca_reps_16 <- subset(anes_num_pca_16, party_id == 2 )
+
+
+#pol:redist model
+pol_redist_rep_16 <- lm(redist_pca1_scaled ~ pol_pca1_scaled +  black + white  + hisp + asian + sex    + income + educ  + age, weights = weights, data = anes_num_pca_reps_16)
+summary(pol_redist_rep_16)
+
+
+
+#pol spend model
+pol_spend_rep_16 <- lm(spend_pca1_scaled ~ pol_pca1_scaled  +  black + white + hisp + asian  + sex     +income + educ  + age, weights = weights, data = anes_num_pca_reps_16)
+summary(pol_spend_rep_16)
+```
+
+```{r}
+#just dems
+anes_num_pca_dems_16 <- subset(anes_num_pca_16, party_id == 1 )
+
+
+#pol:redist model
+pol_redist_dem_16 <- lm(redist_pca1_scaled ~ pol_pca1_scaled +  black + white  + hisp + asian + sex    + income + educ  + age, weights = weights, data = anes_num_pca_dems_16)
+
+summary(pol_redist_dem_16)
+
+
+#pol spend model
+pol_spend_dem_16 <- lm(spend_pca1_scaled ~ pol_pca1_scaled  +  black + white   + hisp + + asian + sex     +income + educ + age , weights = weights, data = anes_num_pca_dems_16)
+summary(pol_spend_dem_16)
+```
+
+
+
+```{r, results = 'asis'}
+
+stargazer(pol_redist_dem_16, pol_spend_dem_16, pol_redist_rep_16,pol_spend_rep_16 ,type = "latex", header = FALSE, font.size = "tiny", column.sep.width = "0.5pt", p.auto = F, title = "2016 Model, Subsetted by Party: Political Interest PC1", covariate.labels = c("Pol. Interest PC1","Black", "White", "Hispanic", "Asian", "Sex",  "Income bracket", "Education", "Age"), dep.var.labels = c("Redistribution PC1 (Dems)", "Spending PC1 (Dems)", "Redistribution PC1 (Reps)", "Spending PC1 (Reps)"), out = "pol_party_16.html")
+
+```
+
+
+
+
+
+**2020 Individual Regressions**
+
+
+**IV: Variables**
+```{r}
+branches_redist_model <- lm(redist_pca1_scaled ~ branches +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+consq_redist_model <- lm(redist_pca1_scaled ~ consq +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+facts_redist_model <- lm(redist_pca1_scaled ~ facts +  black + white  + hisp + asian + sex + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+crit_redist_model <- lm(redist_pca1_scaled ~ crit +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+```
+
+```{r, results = 'asis'}
+
+stargazer(branches_redist_model, consq_redist_model, facts_redist_model, crit_redist_model ,type = "latex", header = FALSE, font.size = "tiny", column.sep.width = "0.5pt", p.auto = F, title = "Redistribution PC1 Regression on Lib. Dem. Components", dep.var.labels = c("Redistribution PC1"), out = "redist_lib_ind.html", omit = c("black", "white", "hisp", "asian", "sex", "seven_point", "income", "educ", "age"), covariate.labels = c("Branches", "Consequences", "Facts", "Criticism"))
+
+```
+
+
+
+
+
+
+```{r}
+vote_redist_model <- lm(redist_pca1_scaled ~ vote_duty +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+int_pol_redist_model <- lm(redist_pca1_scaled ~ int_pol +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age, weights = weights, data = anes_num_pca)
+
+int_med_redist_model <- lm(redist_pca1_scaled ~ int_med +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+
+```
+
+```{r, results = 'asis'}
+
+stargazer(vote_redist_model, int_pol_redist_model, int_med_redist_model ,type = "latex", header = FALSE, font.size = "tiny", column.sep.width = "0.5pt", p.auto = F, title = "Redistribution PC1 Regression on Political Interest Components", dep.var.labels = c("Redistribution PC1"), out = "redist_pol_ind.html", omit = c("black", "white", "hisp", "asian", "sex", "seven_point", "income", "educ", "age"), covariate.labels = c("Voting Duty", "Pol. Interest", "Pol. Media Interest"))
+
+```
+
+
+
+
+
+
+
+```{r}
+branches_spend_model <- lm(spend_pca1_scaled ~ branches +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+consq_spend_model <- lm(spend_pca1_scaled ~ consq +  black + white  + hisp + asian + sex + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+facts_spend_model <- lm(spend_pca1_scaled ~ facts +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+crit_spend_model <- lm(spend_pca1_scaled ~ crit +  black + white  + hisp + asian + sex  + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+```
+
+```{r, results = 'asis'}
+
+stargazer(branches_spend_model, consq_spend_model, facts_spend_model, crit_spend_model ,type = "latex", header = FALSE, font.size = "tiny", column.sep.width = "0.5pt", p.auto = F, title = "Spending PC1 Regression on Lib. Dem. Components", dep.var.labels = c("Spending PC1"),  out = "spend_lib_ind.html", omit = c("black", "white", "hisp", "asian", "sex", "seven_point", "income", "educ", "age"), covariate.labels = c("Branches", "Consequences", "Facts", "Criticism"))
+
+```
+
+
+
+
+```{r}
+vote_spend_model <- lm(spend_pca1_scaled ~ vote_duty +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+int_pol_spend_model <- lm(spend_pca1_scaled ~ int_pol +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+int_med_spend_model <- lm(spend_pca1_scaled ~ int_med +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+
+```
+
+```{r, results = 'asis'}
+
+stargazer(vote_spend_model, int_pol_spend_model, int_med_spend_model ,type = "latex", header = FALSE, font.size = "tiny", column.sep.width = "0.5pt", p.auto = F, title = "Spending PC1 Regression on Political Interest Components", dep.var.labels = c("Spending PC1"), out = "spend_pol_ind.html", omit = c("black", "white", "hisp", "asian", "sex", "seven_point", "income", "educ", "age"), covariate.labels = c("Vote Duty", "Political Interest", "Political Media Interest"))
+
+```
+
+
+
+**IV: PCA1**
+
+
+
+```{r}
+red_ineq_lib_model <- lm(red_ineq ~ lib_pca1_scaled +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+tax_mill_lib_model <- lm(tax_mill ~ lib_pca1_scaled +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+job_gov_lib_model <- lm(job_gov ~ lib_pca1_scaled +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+min_wage_lib_model <- lm(min_wage ~ lib_pca1_scaled +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+
+```
+
+```{r, results = 'asis'}
+
+stargazer(red_ineq_lib_model, tax_mill_lib_model, job_gov_lib_model ,min_wage_lib_model, type = "latex", header = FALSE, font.size = "tiny", column.sep.width = "0.5pt", p.auto = F, title = "Redistribution variables Regression on Lib Dem. PC1", dep.var.labels = c("Reduce Inequality", "Tax Millionaires", "Government Provide Jobs", "Minimum Wage"), out = "lib_redist_comps.html", omit = c("black", "white", "hisp", "asian", "sex", "seven_point", "income", "educ", "age"), covariate.labels = c("Lib PCA 1"))
+
+```
+
+
+
+```{r}
+red_ineq_lib_model <- lm(red_ineq ~ pol_pca1_scaled + black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+tax_mill_lib_model <- lm(tax_mill ~ pol_pca1_scaled +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+job_gov_lib_model <- lm(job_gov ~ pol_pca1_scaled +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+min_wage_lib_model <- lm(min_wage ~ pol_pca1_scaled +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+
+```
+
+```{r, results = 'asis'}
+
+stargazer(red_ineq_lib_model, tax_mill_lib_model, job_gov_lib_model ,min_wage_lib_model, type = "latex", header = FALSE, font.size = "tiny", column.sep.width = "0.5pt", p.auto = F, title = "Redistribution Variables Regression on Political Interest PC1", dep.var.labels = c("Reduce Inequality", "Tax Millionaires", "Government Provide Jobs", "Minimum Wage"), out = "pol_redist_comps.html", omit = c("black", "white", "hisp", "asian", "sex", "seven_point", "income", "educ", "age"), covariate.labels = c("Pol PCA 1"))
+
+```
+
+
+
+
+```{r}
+healthcare_lib_model <- lm(healthcare ~ lib_pca1_scaled +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+school_lib_model <- lm(school ~ lib_pca1_scaled +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+welfare_lib_model <- lm(welfare ~ lib_pca1_scaled +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+poor_lib_model <- lm(min_wage ~ lib_pca1_scaled +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+
+```
+
+```{r, results = 'asis'}
+
+stargazer(healthcare_lib_model, school_lib_model, welfare_lib_model ,poor_lib_model, type = "latex", header = FALSE, font.size = "tiny", column.sep.width = "0.5pt", p.auto = F, title = "Spending variables regression on Lib Dem. PC1", dep.var.labels = c("Healthcare", "Schools", "Welfare", "Poor"), out = "lib_spend_comps.html", omit = c("black", "white", "hisp", "asian", "sex", "seven_point", "income", "educ", "age"), covariate.labels = c("Lib PCA 1"))
+
+```
+
+
+
+
+
+
+```{r}
+healthcare_pol_model <- lm(healthcare ~ pol_pca1_scaled +  black + white  + hisp + asian + sex  + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+
+school_pol_model <- lm(school ~ pol_pca1_scaled + black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+welfare_pol_model <- lm(welfare ~ pol_pca1_scaled +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+poor_pol_model <- lm(min_wage ~ pol_pca1_scaled +  black + white  + hisp + asian + sex   + seven_point + income + educ  + age , weights = weights, data = anes_num_pca)
+
+
+```
+
+```{r, results = 'asis'}
+
+stargazer(healthcare_pol_model, school_pol_model, welfare_pol_model ,poor_pol_model, type = "latex", header = FALSE, font.size = "tiny", column.sep.width = "0.5pt", p.auto = F, title = "Spending variables regression on Political Interest PC1", dep.var.labels = c("Healthcare", "Schools", "Welfare", "Poor"), out = "pol_spend_comps.html", omit = c("black", "white", "hisp", "asian", "sex", "seven_point", "income", "educ", "age"), covariate.labels = c("Pol PCA 1"))
+
+```
