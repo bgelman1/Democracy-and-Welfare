@@ -17,3 +17,6 @@ pca_new.rmd: takes in anes_num_pca.csv,  creates PCA metrics
 EDA.rmd: does some exploratory data analysis
 
 final_tables.rmd: makes al the final regression tables
+
+
+Democracy_Welfare_Report.pdf is an extensive report on this research and its implications. 
