@@ -1,0 +1,477 @@
+---
+title: "Anes_2020_cleaning"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+```
+
+
+
+```{r}
+anes_orig <- read_csv('ANES_2020.csv')
+
+```
+
+
+
+```{r}
+
+anes_new = anes_orig[,FALSE]
+
+```
+
+```{r}
+#ID
+anes_new$ID = anes_orig$V200001
+
+anes_new$weights <- anes_orig$V200010b
+
+
+```
+
+
+```{r}
+#Liberal Democracy Norms
+
+anes_new$consq = anes_orig$V201368
+anes_new$branches = anes_orig$V201367
+anes_new$crit = anes_orig$V201366
+anes_new$facts = anes_orig$V201369
+anes_new$cong_courts = anes_orig$V201370
+anes_new$bend <- anes_orig$V202413
+
+
+```
+
+
+
+```{r}
+
+#Political Investment
+anes_new$vote_duty = anes_orig$V201221
+anes_new$vote_2020 = anes_orig$V202072
+anes_new$vote_house = anes_orig$V202080
+anes_new$yrs_sen = anes_orig$V201644
+anes_new$sen_diff <- abs(6- anes_new$yrs_sen )
+anes_new$vote_2012 = anes_orig$V201104
+anes_new$vote_sen <- anes_orig$V202087
+anes_new$reg = anes_orig$V201008
+
+
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  vote_house= case_when(
+    vote_house==2~ 0,
+    vote_house==1~ 1))  
+
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  vote_duty= case_when(
+    vote_duty==1~ 3,
+    vote_duty==2~ 1,
+    vote_duty==3 ~2))  
+
+
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  vote_2020= case_when(
+    vote_2020==2~ 0,
+    vote_2020==1~ 1))  
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  vote_2012= case_when(
+    vote_2012==2~ 0,
+    vote_2012==1~ 1)) 
+
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  reg= case_when(
+    reg==1~ 1,
+    reg==2~ 1,
+    reg==3 ~0))  
+
+
+
+
+
+```
+
+
+
+
+
+
+```{r}
+#Spending
+
+anes_new$ss = anes_orig$V201300
+anes_new$school = anes_orig$V201303
+anes_new$welfare = anes_orig$V201312
+anes_new$highway = anes_orig$V201315
+anes_new$poor = anes_orig$V201318
+anes_new$healthcare = anes_orig$V202379
+
+```
+
+
+```{r}
+#Redistribution
+
+anes_new$tax_mill = anes_orig$V202325
+anes_new$ubi = anes_orig$V202374
+anes_new$red_ineq = anes_orig$V202257
+anes_new$min_wage = anes_orig$V202377
+anes_new$chance_life = anes_orig$V202262
+anes_new$job_gov = anes_orig$V201255
+anes_new$fair = anes_orig$V202263
+anes_new$reduce_extra <- anes_orig$V202259x
+
+```
+
+```{r}
+#demographic
+anes_new$state <- anes_orig$V203000
+
+
+anes_new$wy <- ifelse(anes_new$state == 56, 1, 0 )
+anes_new$ny <- ifelse(anes_new$state == 36, 1, 0 )
+mean(anes_new$wy)
+mean(anes_new$ny)
+dim(anes_new)
+
+anes_new$cong_dist <- anes_orig$V203002
+anes_new$census_region <- anes_orig$V203003
+anes_new$county <- anes_orig$V203005
+anes_new$zip <- anes_orig$V203007
+
+anes_new$sex <- anes_orig$V201600
+anes_new$race <- anes_orig$V201549x
+anes_new$hisp <- anes_orig$V201546
+
+
+unique(anes_new$hisp)
+anes_new$born <- anes_orig$V201554
+anes_new$class <- anes_orig$V202352
+anes_new$fs <- anes_orig$V202563
+anes_new$educ <- anes_orig$V201510
+anes_new$income <- anes_orig$V201617x
+anes_new$age <- anes_orig$V201507x
+
+
+unique(anes_new$income)
+
+anes_new <- anes_new %>% dplyr::mutate(
+  hisp= case_when(
+    hisp==1~ 1,
+    hisp==2~ 0
+    ))  
+
+
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  fs= case_when(
+    fs==1~ 1,
+    fs==2~ 0
+    ))  
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  born= case_when(
+    born==1~ 1,
+    born==2~ 1,
+    born==3 ~1,
+    born==4 ~0
+    ))  
+
+mean(anes_new$age)
+
+
+anes_new$educ[anes_new$educ == 95] <- NA
+
+
+anes_new$black <- ifelse(anes_new$race == 2, 1, 0 )
+anes_new$white <- ifelse(anes_new$race == 1, 1, 0 )
+anes_new$amind <- ifelse(anes_new$race == 3, 1, 0 )
+anes_new$asian <- ifelse(anes_new$race == 4, 1, 0 )
+anes_new$pi <- ifelse(anes_new$race == 5, 1, 0 )
+
+unique(anes_new$fs)
+```
+
+
+
+```{r}
+#race q's
+
+anes_new$black_favors <- anes_orig$V202300
+anes_new$blm <- anes_orig$V202174
+anes_new$black_deserve <- anes_orig$V202302
+anes_new$black_try <- anes_orig$V202303
+anes_new$slave <- anes_orig$V202301
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  black_try= case_when(
+    black_try==1~ 5,
+    black_try==2~ 4,
+    black_try==3 ~3,
+   black_try==4 ~2,
+   black_try==5 ~1))  
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  black_favors= case_when(
+    black_favors==1~ 5,
+    black_favors==2~ 4,
+    black_favors==3 ~3,
+   black_favors==4 ~2,
+   black_favors==5 ~1))  
+
+
+
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  slave= case_when(
+    slave==1~ 5,
+    slave==2~ 4,
+    slave==3 ~3,
+   slave==4 ~2,
+   slave==5 ~1))  
+
+
+
+anes_new$zip <- anes_orig$V203007
+
+
+
+```
+
+```{r}
+#politics
+
+anes_new$vote_2012_choice <- anes_orig$V201105
+anes_new$dem_feel <- anes_orig$V201156
+anes_new$rep_feel <- anes_orig$V201157
+anes_new$lib_con_spec <- anes_orig$V201200
+anes_new$lib_con_binary <- anes_orig$V201201
+
+unique(anes_new$lib_con_spec)
+mean(anes_new$lib_con_spec, na.rm = T)
+
+anes_new$int_camp <- anes_orig$V201006
+
+anes_new$int_pol <- anes_orig$V202406
+
+
+
+anes_new$int_med <- anes_orig$V202407
+
+
+anes_new$lib_con_spec[anes_new$lib_con_spec == 99] <- NA
+
+
+
+```
+
+```{r}
+#party id
+anes_new$party_reg <- anes_orig$V201228
+anes_new$party_id <- anes_orig$V201228
+anes_new$strong_weak <- anes_orig$V201229
+anes_new$ind <- anes_orig$V201230
+anes_new$seven_point <- NA
+anes_new$seven_point[anes_new$party_id == 1 & anes_new$strong_weak == 1 ] <- 1
+anes_new$seven_point[anes_new$party_id == 1 & anes_new$strong_weak == 2 ] <- 2
+anes_new$seven_point[anes_new$party_id == 3 & anes_new$ind == 3] <- 3
+anes_new$seven_point[anes_new$party_id == 3 & anes_new$ind == 2] <- 4
+anes_new$seven_point[anes_new$party_id == 3 & anes_new$ind == 1] <- 5
+anes_new$seven_point[anes_new$party_id == 2 & anes_new$strong_weak == 2] <- 6
+anes_new$seven_point[anes_new$party_id == 2 & anes_new$strong_weak == 1] <- 7
+
+
+```
+
+
+
+```{r}
+
+#rescale some variables
+anes_new <- anes_new %>% dplyr::mutate(
+  int_camp= case_when(
+    int_camp==1~ 3,
+    int_camp==2~ 2,
+    int_camp==3 ~1))  
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  int_pol= case_when(
+    int_pol==1~ 4,
+    int_pol==2~ 3,
+    int_pol==3 ~2,
+    int_pol==4 ~1,))  
+
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  int_med= case_when(
+    int_med==1~ 4,
+    int_med==2~ 3,
+    int_med==3 ~2,
+    int_med==4 ~1,))  
+
+
+
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  cong_courts= case_when(
+    cong_courts==1~ 1,
+    cong_courts==2~ 3,
+    cong_courts==3 ~2))  
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  tax_mill= case_when(
+    tax_mill==1~ 3,
+    tax_mill==2~ 1,
+    tax_mill==3 ~2))  
+
+
+
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  red_ineq= case_when(
+    red_ineq==1~ 3,
+    red_ineq==2~ 1,
+    red_ineq==3 ~2))  
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  min_wage= case_when(
+    min_wage==1~ 4,
+    min_wage==2~ 3,
+    min_wage==3 ~2,
+    min_wage==4 ~1,))  
+
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  job_gov= case_when(
+    job_gov==7~ 1,
+    job_gov==6~ 2,
+    job_gov==5 ~3,
+    job_gov==4 ~4,
+    job_gov==3 ~5,
+    job_gov==2 ~6,
+    job_gov==1 ~7))  
+
+
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  reduce_extra= case_when(
+    reduce_extra==7~ 1,
+    reduce_extra==6~ 2,
+    reduce_extra==5 ~3,
+    reduce_extra==4 ~4,
+    reduce_extra==3 ~5,
+    reduce_extra==2 ~6,
+    reduce_extra==1 ~7))  
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  welfare= case_when(
+    welfare==1~ 3,
+    welfare==2~ 1,
+    welfare==3 ~2))  
+
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  school= case_when(
+    school==1~ 3,
+    school==2~ 1,
+    school==3 ~2))  
+
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  healthcare= case_when(
+    healthcare==1~ 3,
+    healthcare==2~ 1,
+    healthcare==3 ~2))  
+
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  ss= case_when(
+    ss==1~ 3,
+    ss==2~ 1,
+    ss==3 ~2))  
+
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  highway= case_when(
+    highway==1~ 3,
+    highway==2~ 1,
+    highway==3 ~2))  
+
+
+
+
+anes_new <- anes_new %>% dplyr::mutate(
+  poor= case_when(
+    poor==1~ 3,
+    poor==2~ 1,
+    poor==3 ~2))  
+
+
+```
+
+
+
+
+
+
+
+```{r}
+anes_new$ID <- as.character(anes_new$ID )
+anes_new_cln <- anes_new
+#filter out NAs
+anes_new_cln[anes_new_cln < 0 | anes_new_cln > 100] <- NA
+colnames(anes_new_cln)
+
+anes_num = anes_new_cln
+
+
+
+
+#save data
+write.csv(anes_num, "anes_num.csv")
+write.csv(anes_num, "anes_num_pca.csv")
+
+```
+
